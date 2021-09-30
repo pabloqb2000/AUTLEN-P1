@@ -289,6 +289,8 @@ class AbstractFiniteAutomatonEvaluator(
             string: String to process.
 
         """
+        if not string:
+            pass
         for symbol in string:
             self.process_symbol(symbol)
 
@@ -298,7 +300,6 @@ class AbstractFiniteAutomatonEvaluator(
         raise NotImplementedError("This method must be implemented.")
 
     def accepts(self, string: str) -> bool:
-        print("ACCEPTING", string)
         """
         Return if a string is accepted without changing state.
 

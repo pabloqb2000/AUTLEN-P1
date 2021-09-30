@@ -21,7 +21,7 @@ class FiniteAutomatonEvaluator(
                 if state == transition.initial_state and symbol == transition.symbol and symbol:
                     new_states.add(transition.final_state)
 
-        self._complete_lambdas(self.current_states)
+        self._complete_lambdas(new_states)
         self.current_states = new_states
 
     def _complete_lambdas(self, set_to_complete: Set[State]) -> None:
@@ -33,7 +33,7 @@ class FiniteAutomatonEvaluator(
             for state in completed_states:
                 for transition in self.automaton.transitions:
                     if state == transition.initial_state and not transition.symbol:
-                        new_states.add(state)
+                        new_states.add(transition.final_state)
 
             if new_states.issubset(set_to_complete):
                 break
@@ -41,6 +41,5 @@ class FiniteAutomatonEvaluator(
             completed_states = new_states
 
     def is_accepting(self) -> bool:
-        print(any(state.is_final for state in self.current_states))
         return any(state.is_final for state in self.current_states)
 
