@@ -13,7 +13,7 @@ class FiniteAutomatonEvaluator(
     def process_symbol(self, symbol: str) -> None:
         new_states = set()
 
-        if symbol not in self.automaton.symbols:
+        if symbol not in self.automaton.symbols and symbol:
             raise ValueError
 
         for state in self.current_states:
@@ -21,7 +21,7 @@ class FiniteAutomatonEvaluator(
                 if state == transition.initial_state and symbol == transition.symbol and symbol:
                     new_states.add(transition.final_state)
 
-        self._complete_lambdas(new_states)
+        self._complete_lambdas(self.current_states)
         self.current_states = new_states
 
     def _complete_lambdas(self, set_to_complete: Set[State]) -> None:
