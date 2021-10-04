@@ -159,5 +159,163 @@ class TestEvaluatorNumber(TestEvaluatorBase):
         self._check_accept("0-0.0", should_accept=False)
 
 
+class TestEvaluatorCustom1(TestEvaluatorBase):
+    """Test lambda cycles."""
+
+    def _create_automata(self) -> FiniteAutomaton:
+
+        description = """
+        Automaton:
+            Symbols: abc
+
+            q0
+            q1
+            q2 final
+
+            --> q0
+            q0 --> q0
+            q0 --> q1
+            q1 --> q0
+            q2 --> q1
+            q1 -a-> q2
+            q1 -b-> q2
+        """
+
+        return AutomataFormat.read(description)
+
+    def test_custom1(self) -> None:
+        """Test lambda cycles."""
+        self._check_accept("", should_accept=False)
+        self._check_accept("a", should_accept=True)
+        self._check_accept("b", should_accept=True)
+        self._check_accept("ab", should_accept=True)
+        self._check_accept("aaabaabbaabbab", should_accept=True)
+        self._check_accept("aaabaabcbabbab", should_accept=False)
+
+
+class TestEvaluatorCustom2(TestEvaluatorBase):
+    """Test lambda cycles."""
+
+    def _create_automata(self) -> FiniteAutomaton:
+
+        description = """
+        Automaton:
+            Symbols: abc
+
+            q0 
+            q1 final
+            q2 
+
+            --> q0
+            q0 --> q0
+            q0 --> q1
+            q1 --> q0
+            q2 --> q1
+            q1 -a-> q2
+            q1 -b-> q2
+        """
+
+        return AutomataFormat.read(description)
+
+    def test_custom2(self) -> None:
+        """Test lambda cycles."""
+        self._check_accept("", should_accept=True)
+        self._check_accept("a", should_accept=True)
+        self._check_accept("b", should_accept=True)
+        self._check_accept("ab", should_accept=True)
+        self._check_accept("aaabaabbaabbab", should_accept=True)
+        self._check_accept("aaabaabcbabbab", should_accept=False)
+
+
+class TestEvaluatorCustom3(TestEvaluatorBase):
+    """Test not repeated bs automata."""
+
+    def _create_automata(self) -> FiniteAutomaton:
+
+        description = """
+        Automaton:
+            Symbols: ab
+
+            q0 final
+            q1 
+            q2 final
+
+            --> q0
+            q0 -b-> q1
+            q0 -b-> q2
+            q0 -a-> q0
+            q1 -a-> q0
+        """
+
+        return AutomataFormat.read(description)
+
+    def test_custom3(self) -> None:
+        """Test not repeated bs automata."""
+        self._check_accept("", should_accept=True)
+        self._check_accept("a", should_accept=True)
+        self._check_accept("b", should_accept=True)
+        self._check_accept("ab", should_accept=True)
+        self._check_accept("ba", should_accept=True)
+        self._check_accept("bab", should_accept=True)
+        self._check_accept("aba", should_accept=True)
+        self._check_accept("ababaaab", should_accept=True)
+        self._check_accept("bababaaab", should_accept=True)
+        self._check_accept("baababaa", should_accept=True)
+        self._check_accept("abaababaa", should_accept=True)
+        self._check_accept("bb", should_accept=False)
+        self._check_accept("bbabaaba", should_accept=False)
+        self._check_accept("babbaaba", should_accept=False)
+        self._check_accept("babaababb", should_accept=False)
+        self._check_accept("babbaababb", should_accept=False)
+        self._check_accept("bbabaababb", should_accept=False)
+
+
+class TestEvaluatorCustom4(TestEvaluatorBase):
+    """Test for (ab + bc)*a."""
+
+    def _create_automata(self) -> FiniteAutomaton:
+
+        description = """
+        Automaton:
+            Symbols: abc
+
+            q0 
+            q1 
+            q2 
+            q3 
+            q4 
+            q5 final
+
+            --> q0
+            q0 -a-> q1
+            q1 -b-> q2
+            q2 -a-> q5
+            q0 -b-> q3
+            q3 -c-> q4
+            q4 -a-> q5
+            q0 --> q2
+            q2 --> q0
+            q0 --> q4
+            q4 --> q0
+        """
+
+        return AutomataFormat.read(description)
+
+    def test_custom4(self) -> None:
+        """Test for (ab + bc)*a."""
+        self._check_accept("", should_accept=False)
+        self._check_accept("a", should_accept=True)
+        self._check_accept("aba", should_accept=True)
+        self._check_accept("bca", should_accept=True)
+        self._check_accept("abbca", should_accept=True)
+        self._check_accept("bcaba", should_accept=True)
+        self._check_accept("bcababbca", should_accept=True)
+        self._check_accept("abbc", should_accept=False)
+        self._check_accept("abca", should_accept=False)
+        self._check_accept("abba", should_accept=False)
+        self._check_accept("ab", should_accept=False)
+        self._check_accept("bbca", should_accept=False)
+
+
 if __name__ == '__main__':
     unittest.main()
