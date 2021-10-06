@@ -45,6 +45,10 @@ class FiniteAutomaton(
         # Add here additional initialization code.
         # Do not change the constructor interface.
 
+    @property
+    def final_state(self):
+        return self.states[-1]
+
     def to_deterministic(
         self,
     ) -> "FiniteAutomaton":
