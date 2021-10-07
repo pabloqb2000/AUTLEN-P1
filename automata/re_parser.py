@@ -60,10 +60,12 @@ class REParser(AbstractREParser):
 
         automaton.final_state.is_final = False
 
-        transitions = [Transition(initial_state, None, automaton.initial_state),
-                        Transition(automaton.final_state, None, final_state),
-                        Transition(automaton.final_state, None, automaton.initial_state),
-                        Transition(initial_state, None, final_state)]
+        transitions = [ 
+            Transition(initial_state, None, automaton.initial_state),
+            Transition(automaton.final_state, None, final_state),
+            Transition(automaton.final_state, None, automaton.initial_state),
+            Transition(initial_state, None, final_state)
+        ]
                         
         return FiniteAutomaton(
             initial_state=initial_state, 
@@ -93,7 +95,7 @@ class REParser(AbstractREParser):
         ]
 
         return FiniteAutomaton(
-            initial_state=automaton1.initial_state,
+            initial_state=initial_state,
             states=[initial_state] + list(automaton1.states) + list(automaton2.states) + [final_state],
             symbols=set(automaton1.symbols) | set(automaton2.symbols),
             transitions=list(automaton1.transitions) + new_transitions + list(automaton2.transitions)
