@@ -14,7 +14,7 @@ class FiniteAutomatonEvaluator(
         new_states = set()
 
         if symbol not in self.automaton.symbols and symbol:
-            raise ValueError
+            raise ValueError(f"Symbol {symbol} is not a valid symbol {self.automaton.symbols}")
 
         for state in self.current_states:
             for transition in self.automaton.transitions:

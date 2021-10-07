@@ -79,6 +79,52 @@ class TestREParser(unittest.TestCase):
         self._check_accept(evaluator, "13,", should_accept=True)
         self._check_accept(evaluator, "3,7,12", should_accept=False)
 
+    def test_lambda(self) -> None:
+        """Test lambda use."""
+        evaluator = self._create_evaluator(
+            "λ+(a.b.λ)+(a.a.b.(b.a+λ))",
+        )
+
+        self._check_accept(evaluator, "", should_accept=True)
+        self._check_accept(evaluator, "ab", should_accept=True)
+        self._check_accept(evaluator, "aab", should_accept=True)
+        self._check_accept(evaluator, "aabba", should_accept=True)
+        self._check_accept(evaluator, "aabb", should_accept=False)
+        self._check_accept(evaluator, "abba", should_accept=False)
+        self._check_accept(evaluator, "aaba", should_accept=False)
+        self._check_accept(evaluator, "abb", should_accept=False)
+        self._check_accept(evaluator, "a", should_accept=False)
+        self._check_accept(evaluator, "b", should_accept=False)
+
+    def test_non_repeated(self) -> None:
+        """Test non repeated bs."""
+        evaluator = self._create_evaluator(
+            "((b.a)+a)*.(b+λ)",
+        )
+
+        self._check_accept(evaluator, "", should_accept=True)
+        self._check_accept(evaluator, "a", should_accept=True)
+        self._check_accept(evaluator, "b", should_accept=True)
+        self._check_accept(evaluator, "aa", should_accept=True)
+        self._check_accept(evaluator, "ba", should_accept=True)
+        self._check_accept(evaluator, "ab", should_accept=True)
+        self._check_accept(evaluator, "ba", should_accept=True)
+        self._check_accept(evaluator, "aaa", should_accept=True)
+        self._check_accept(evaluator, "baa", should_accept=True)
+        self._check_accept(evaluator, "aba", should_accept=True)
+        self._check_accept(evaluator, "aab", should_accept=True)
+        self._check_accept(evaluator, "bab", should_accept=True)
+        self._check_accept(evaluator, "abab", should_accept=True)
+        self._check_accept(evaluator, "baba", should_accept=True)
+        self._check_accept(evaluator, "baab", should_accept=True)
+        self._check_accept(evaluator, "bb", should_accept=False)
+        self._check_accept(evaluator, "bbb", should_accept=False)
+        self._check_accept(evaluator, "bba", should_accept=False)
+        self._check_accept(evaluator, "abb", should_accept=False)
+        self._check_accept(evaluator, "bbab", should_accept=False)
+        self._check_accept(evaluator, "babb", should_accept=False)
+        self._check_accept(evaluator, "abba", should_accept=False)
+
 
 if __name__ == "__main__":
     unittest.main()
