@@ -1,5 +1,5 @@
 """Automaton implementation."""
-from typing import Collection
+from typing import Collection, Set
 
 from automata.interfaces import (
     AbstractFiniteAutomaton,
@@ -48,6 +48,25 @@ class FiniteAutomaton(
     @property
     def final_state(self):
         return self.states[-1]
+
+    def get_closure(self, states: Set[State]) -> Set[State]:
+        states_to_complete = states
+        closure = states.copy()
+
+        while True:
+            new_states = set()
+
+            for state in states_to_complete:
+                for transition in self.transitions:
+                    if state == transition.initial_state and not transition.symbol:
+                        new_states.add(transition.final_state)
+
+            if new_states.issubset(closure):
+                break
+            closure.update(new_states)
+            states_to_complete = new_states
+        
+        return closure
 
     def to_deterministic(
         self,
