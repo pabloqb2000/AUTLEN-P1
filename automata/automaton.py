@@ -68,10 +68,58 @@ class FiniteAutomaton(
         
         return closure
 
+    def state_from_state_set(self, states_set: Set[State]) -> State:
+        return State(
+            name="-".join([state.name for state in states_set]),
+            is_final=any(state.is_final for state in states_set)
+        )
+
     def to_deterministic(
         self,
     ) -> "FiniteAutomaton":
-        raise NotImplementedError("This method must be implemented.")
+        new_transitions = set()
+        new_states = set()
+        initial_state_closure = self.get_closure({self.initial_state})
+        initial_state = self.state_from_state_set(initial_state_closure)
+        states_to_evaluate = [(
+            initial_state_closure,
+            initial_state
+        )]
+
+        while states_to_evaluate:
+            state_set, state = states_to_evaluate.pop()
+            new_states.add(state)
+
+            for symbol in set(self.symbols):
+                reachable_states = {
+                    transition.final_state
+                    for transition in self.transitions
+                    if transition.symbol == symbol and \
+                       transition.initial_state in state_set
+                }
+
+                if not reachable_states:
+                    continue
+
+                reachable_states = self.get_closure(reachable_states)
+                new_state = self.state_from_state_set(reachable_states)
+                new_state_tupple = (
+                    reachable_states,
+                    new_state
+                )
+                if not new_state in new_states:
+                    states_to_evaluate.append(new_state_tupple)
+
+                new_transitions.add(Transition(
+                    state, symbol, new_state
+                ))
+        
+        return FiniteAutomaton(
+            initial_state=initial_state,
+            states=new_states,
+            symbols=self.symbols,
+            transitions=new_transitions
+        )
 
     def to_minimized(
         self,
