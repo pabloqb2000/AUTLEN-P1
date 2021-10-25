@@ -381,6 +381,7 @@ class TestTransform(ABC, unittest.TestCase):
             q4 --> q7
             q5 -c-> q6
             q6 --> q7
+            q7 --> q1
             q7 --> qf
         """
 
@@ -395,7 +396,7 @@ class TestTransform(ABC, unittest.TestCase):
             empty
 
             --> q0
-            q0 -a-> 3
+            q0 -a-> q3
             q0 -b-> empty
             q0 -c-> q1
             q1 -a-> q3
@@ -412,5 +413,9 @@ class TestTransform(ABC, unittest.TestCase):
             empty -c-> empty
         """
 
+        automaton = AutomataFormat.read(automaton_str)
+        expected = AutomataFormat.read(expected_str)
+        self._check_transform(automaton, expected)
+        
 if __name__ == '__main__':
     unittest.main()
