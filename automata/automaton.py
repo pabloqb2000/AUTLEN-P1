@@ -56,21 +56,22 @@ class FiniteAutomaton(
         while True:
             new_states = set()
 
-            for state in states_to_complete:
-                for transition in self.transitions:
-                    if state == transition.initial_state and not transition.symbol:
-                        new_states.add(transition.final_state)
+            for transition in self.transitions:
+                if transition.initial_state in states_to_complete and not transition.symbol:
+                    new_states.add(transition.final_state)
 
             if new_states.issubset(closure):
                 break
+            states_to_complete = new_states - closure
             closure.update(new_states)
-            states_to_complete = new_states
         
         return closure
 
     def state_from_state_set(self, states_set: Set[State]) -> State:
+        if not states_set:
+            return State("empty")
         return State(
-            name="-".join([state.name for state in states_set]),
+            name="".join([state.name for state in states_set]),
             is_final=any(state.is_final for state in states_set)
         )
 
@@ -81,6 +82,8 @@ class FiniteAutomaton(
         new_states = set()
         initial_state_closure = self.get_closure({self.initial_state})
         initial_state = self.state_from_state_set(initial_state_closure)
+        # sink_state = State("empty")
+        # new_states.add(sink_state)
         states_to_evaluate = [(
             initial_state_closure,
             initial_state
@@ -95,11 +98,8 @@ class FiniteAutomaton(
                     transition.final_state
                     for transition in self.transitions
                     if transition.symbol == symbol and \
-                       transition.initial_state in state_set
+                        transition.initial_state in state_set
                 }
-
-                if not reachable_states:
-                    continue
 
                 reachable_states = self.get_closure(reachable_states)
                 new_state = self.state_from_state_set(reachable_states)
@@ -114,6 +114,11 @@ class FiniteAutomaton(
                     state, symbol, new_state
                 ))
         
+        # for symbol in self.symbols:
+        #     new_transitions.add(Transition(
+        #         sink_state, symbol, sink_state
+        #     ))
+
         return FiniteAutomaton(
             initial_state=initial_state,
             states=new_states,
