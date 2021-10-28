@@ -416,6 +416,31 @@ class TestTransform(ABC, unittest.TestCase):
         automaton = AutomataFormat.read(automaton_str)
         expected = AutomataFormat.read(expected_str)
         self._check_transform(automaton, expected)
+
+    def test_case6(self) -> None:
+        automaton_str = """
+        Automaton:
+            Symbols: 
+
+            q0
+
+            --> q0
+            q0 --> q0
+        """
+
+        expected_str = """
+        Automaton:
+            Symbols: 
+
+            q0
+
+            --> q0
+        """
+
+        automaton = AutomataFormat.read(automaton_str)
+        expected = AutomataFormat.read(expected_str)
+        self._check_transform(automaton, expected)
+
         
 if __name__ == '__main__':
     unittest.main()
