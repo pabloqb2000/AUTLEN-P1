@@ -1,6 +1,8 @@
 """Test evaluation of finite automaton to minimized."""
 import unittest
 from abc import ABC
+# import pygraphviz as pgv
+# import os
 
 from automata.automaton_evaluator import FiniteAutomatonEvaluator
 from automata.automaton import FiniteAutomaton
@@ -34,6 +36,12 @@ class TestTransform(ABC, unittest.TestCase):
         automaton = AutomataFormat.read(automaton_str)
         expected = AutomataFormat.read(expected_str)
         transformed = automaton.to_deterministic().to_minimized()
+        
+        # n = len([name for name in os.listdir('imgs/to_minimized') if os.path.isfile(os.path.join('imgs/to_minimized', name))]) // 2
+        # G = pgv.AGraph(write_dot(automaton))
+        # G.draw(f"imgs/to_minimized/test_case_{n}_automaton.png", prog="dot") 
+        # G = pgv.AGraph(write_dot(transformed))
+        # G.draw(f"imgs/to_minimized/test_case_{n}_transformed.png", prog="dot") 
 
         equiv_map = deterministic_automata_isomorphism(
             transformed,

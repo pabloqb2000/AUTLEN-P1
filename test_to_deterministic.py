@@ -1,6 +1,8 @@
 """Test evaluation of finite automaton to deterministic."""
 import unittest
 from abc import ABC
+# import pygraphviz as pgv
+# import os
 
 from automata.automaton_evaluator import FiniteAutomatonEvaluator
 from automata.automaton import FiniteAutomaton
@@ -36,6 +38,13 @@ class TestTransform(ABC, unittest.TestCase):
         automaton = AutomataFormat.read(automaton_str)
         expected = AutomataFormat.read(expected_str)
         transformed = automaton.to_deterministic()
+        
+        # n = len([name for name in os.listdir('imgs/to_deterministic') if os.path.isfile(os.path.join('imgs/to_deterministic', name))]) // 2
+        # G = pgv.AGraph(write_dot(automaton))
+        # G.draw(f"imgs/to_deterministic/to_deterministic_test_case_{n}_automaton.png", prog="dot") 
+        # G = pgv.AGraph(write_dot(transformed))
+        # G.draw(f"imgs/to_deterministic/to_deterministic_test_case_{n}_transformed.png", prog="dot") 
+
         equiv_map = deterministic_automata_isomorphism(
             transformed,
             expected,
