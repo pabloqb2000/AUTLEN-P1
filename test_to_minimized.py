@@ -10,7 +10,11 @@ from test_re_parser import TestREParser
 
 
 class ReTest(TestREParser):
-    """Test that the transormed automatas have the same behaviour as the non transformed ones."""
+    """
+    Test that the transormed automatas have the same behaviour as the non transformed ones.
+    For this we use the automaton generated from the regular expresions and check that the
+    transformed automatas still accept/reject the same strings as before.
+    """
 
     def _create_evaluator(self, regex: str) -> FiniteAutomatonEvaluator:
         automaton = REParser().create_automaton(regex).to_deterministic().to_minimized()
@@ -24,7 +28,7 @@ class TestTransform(ABC, unittest.TestCase):
     def _check_transform(
         self,
         automaton_str: str,
-        expected_str: str,
+        expected_str:  str,
     ) -> None:
         """Test that the transformed automaton is as the expected one."""
         automaton = AutomataFormat.read(automaton_str)
@@ -39,6 +43,14 @@ class TestTransform(ABC, unittest.TestCase):
         self.assertTrue(equiv_map is not None)
 
     def test_case1(self):
+        """
+        Test Case 1.
+            One transition automata.
+            Test that the empty state is created properly
+            with one connection for each symbol.
+            And this state is not eliminated
+        """
+
         automaton_str = """
         Automaton:
             Symbols: 01
@@ -70,13 +82,9 @@ class TestTransform(ABC, unittest.TestCase):
         
     def test_case2(self):
         """
-        Un caso representativo:
-        AFD que reconoce cadenas
-        con un número par de
-        símbolos, y la cadena
-        vacía. Se ha ampliado
-        artificiosamente con
-        estados adicionales. 
+        Test Case 2.
+            Check that useless aditional states
+            are properly eliminated.
         """
 
         automaton_str = """
@@ -122,11 +130,10 @@ class TestTransform(ABC, unittest.TestCase):
 
     def test_case3(self):
         """
-        Un caso representativo:
-        Se puede comprobar
-        intuitivamente que los
-        estados q1 y q3, y q2 y q4,
-        son equivalentes entre sí.
+        Test Case 3.
+            Check that both q1 and q3
+            and q2 and q4 are considered
+            equivalent.
         """
 
         automaton_str = """
@@ -172,11 +179,8 @@ class TestTransform(ABC, unittest.TestCase):
 
     def test_case4(self):
         """
-        Un caso representativo:
-        Se puede comprobar
-        intuitivamente que los
-        estados A y B son
-        equivalentes.
+        Test Case 4.
+            Check that A and B states are considered equivalent.
         """
 
         automaton_str = """
@@ -231,6 +235,103 @@ class TestTransform(ABC, unittest.TestCase):
             E  -c-> E
         """
         self._check_transform(automaton_str, expected_str)
+    
+    def test_case5(self) -> None:
+        """
+        Test Case 5.
+            No symbols automata.
+            Check that the lambda transtion is eliminated.
+        """
+
+        automaton_str = """
+        Automaton:
+            Symbols: 
+
+            q0
+
+            --> q0
+            q0 --> q0
+        """
+
+        expected_str = """
+        Automaton:
+            Symbols: 
+
+            q0
+
+            --> q0
+        """
+
+        self._check_transform(automaton_str, expected_str)
+    
+    def test_case6(self) -> None:
+        """
+        Test Case 6.
+            Check that unconnected states are eliminated.
+        """
+
+        automaton_str = """
+        Automaton:
+            Symbols: 
+
+            q0
+            q1
+            q2
+            q3
+            q4
+
+            --> q0
+            q0 --> q0
+            q0 --> q1
+            q0 --> q3
+            q3 --> q0
+            q4 --> q0
+        """
+
+        expected_str = """
+        Automaton:
+            Symbols: 
+
+            q0
+
+            --> q0
+        """
+
+        self._check_transform(automaton_str, expected_str)
+
+
+    
+    def test_case7(self) -> None:
+        """
+        Test Case 7.
+            Check that minimazed automatas are not modified
+        """
+
+        automaton_str = """
+        Automaton:
+            Symbols: abc
+
+            AB final
+            C final
+            D final
+            E
+
+            --> AB
+            AB -a-> AB
+            AB -b-> C
+            AB -c-> AB
+            C  -a-> AB
+            C  -b-> D
+            C  -c-> AB
+            D  -a-> E
+            D  -b-> E
+            D  -c-> E
+            E  -a-> E
+            E  -b-> E
+            E  -c-> E
+        """
+
+        self._check_transform(automaton_str, automaton_str)
 
 if __name__ == '__main__':
     unittest.main()

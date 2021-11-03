@@ -149,7 +149,7 @@ class FiniteAutomaton(
             for state in states
         ]
         
-        for _ in range(len(states) - 2):
+        for _ in range(len(states)):
             i, used = 0, []
             new_idx = max(list_1) + 1
             list_2 = [None for _ in list_1]

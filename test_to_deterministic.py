@@ -10,10 +10,15 @@ from automata.re_parser import REParser
 from test_re_parser import TestREParser
 
 class ReTest(TestREParser):
-    """Test that the transormed automatas have the same behaviour as the non transformed ones."""
+    """
+    Test that the transormed automatas have the same behaviour as the non transformed ones.
+    For this we use the automaton generated from the regular expresions and check that the
+    transformed automatas still accept/reject the same strings as before.
+    """
 
     def _create_evaluator(self, regex: str) -> FiniteAutomatonEvaluator:
         automaton = REParser().create_automaton(regex).to_deterministic()
+        
         if not is_deterministic(automaton):
             raise ValueError("Automaton is not deterministic") 
         return FiniteAutomatonEvaluator(automaton)
@@ -24,10 +29,12 @@ class TestTransform(ABC, unittest.TestCase):
 
     def _check_transform(
         self,
-        automaton: FiniteAutomaton,
-        expected: FiniteAutomaton,
+        automaton_str: str,
+        expected_str:  str,
     ) -> None:
         """Test that the transformed automaton is as the expected one."""
+        automaton = AutomataFormat.read(automaton_str)
+        expected = AutomataFormat.read(expected_str)
         transformed = automaton.to_deterministic()
         equiv_map = deterministic_automata_isomorphism(
             transformed,
@@ -37,7 +44,12 @@ class TestTransform(ABC, unittest.TestCase):
         self.assertTrue(equiv_map is not None)
 
     def test_case1(self) -> None:
-        """Test Case 1."""
+        """
+        Test Case 1.
+            One transition automata.
+            Test that the empty state is created properly
+            with one connection for each symbol.
+        """
         automaton_str = """
         Automaton:
             Symbols: 01
@@ -64,29 +76,29 @@ class TestTransform(ABC, unittest.TestCase):
             qf -1-> empty
             empty -0-> empty
             empty -1-> empty
-
         """
 
-        automaton = AutomataFormat.read(automaton_str)
-        expected = AutomataFormat.read(expected_str)
 
-        self._check_transform(automaton, expected)
+        self._check_transform(automaton_str, expected_str)
 
     def test_case2(self) -> None:
-        """Un caso representativo:  
-        AF que reconoce un número 
-        decimal con signo opcional."""
+        """
+        Test Case 2.
+            Transform complex automaton to deterministic
+            The given automaton validates integer inputs
+            Test that the algorithm handles multiple
+            connections using multiple symbols.
+        """
+
         automaton_str = """
         Automaton:
             Symbols: 0123456789+-.
-
             q0
             q1
             q2
             q3
             q4
             q5 final
-
             -->q0
             q0 -+-> q1
             q0 ---> q1
@@ -139,7 +151,6 @@ class TestTransform(ABC, unittest.TestCase):
         expected_str = """
         Automaton:
             Symbols: 0123456789+-.
-
             q0
             q1
             q2
@@ -147,7 +158,6 @@ class TestTransform(ABC, unittest.TestCase):
             q4 final
             q5 final
             empty
-
             --> q0
             q0 -+-> q1
             q0 ---> q1
@@ -240,20 +250,15 @@ class TestTransform(ABC, unittest.TestCase):
             empty -8-> empty
             empty -9-> empty
             empty -.-> empty
-
         """
 
-        automaton = AutomataFormat.read(automaton_str)
-        expected = AutomataFormat.read(expected_str)
-
-        self._check_transform(automaton, expected)
+        self._check_transform(automaton_str, expected_str)
         
     def test_case3(self) -> None:
-        """Un caso representativo:  
-        AF que reconoce las cadenas 
-        “1”, “01”, y “101”, 
-        artificiosamente ampliado con 
-        transiciones lambda.
+        """
+        Test Case 3.
+            Test that the extra lambda connections
+            are deleted properly.
         """ 
 
         automaton_str = """
@@ -308,17 +313,14 @@ class TestTransform(ABC, unittest.TestCase):
             empty -1-> empty
         """
         
-        automaton = AutomataFormat.read(automaton_str)
-        expected = AutomataFormat.read(expected_str)
-        self._check_transform(automaton, expected)
+        self._check_transform(automaton_str, expected_str)
 
     def test_case4(self) -> None:
-        """Test Case 4.
-            Un caso representativo:
-            AF que reconoce las cadenas
-            acabadas en “11”. El AFD
-            resultante mantiene el
-            número de estados.
+        """
+        Test Case 4.
+            Check that the transformed automata
+            doesn't add a new empty state if this
+            is not needed.
         """
         automaton_str = """
         Automaton:
@@ -352,11 +354,13 @@ class TestTransform(ABC, unittest.TestCase):
             q0q1qf -1-> q0q1qf
         """
 
-        automaton = AutomataFormat.read(automaton_str)
-        expected = AutomataFormat.read(expected_str)
-        self._check_transform(automaton, expected)
+        self._check_transform(automaton_str, expected_str)
 
     def test_case5(self) -> None:
+        """
+        Test Case 5.
+            Check that states are joined properly.
+        """
         automaton_str = """
         Automaton:
             Symbols: abc
@@ -413,11 +417,15 @@ class TestTransform(ABC, unittest.TestCase):
             empty -c-> empty
         """
 
-        automaton = AutomataFormat.read(automaton_str)
-        expected = AutomataFormat.read(expected_str)
-        self._check_transform(automaton, expected)
+        self._check_transform(automaton_str, expected_str)
 
     def test_case6(self) -> None:
+        """
+        Test Case 6.
+            No symbols automata.
+            Check that the lambda transtion is eliminated.
+        """
+
         automaton_str = """
         Automaton:
             Symbols: 
@@ -437,9 +445,42 @@ class TestTransform(ABC, unittest.TestCase):
             --> q0
         """
 
-        automaton = AutomataFormat.read(automaton_str)
-        expected = AutomataFormat.read(expected_str)
-        self._check_transform(automaton, expected)
+        self._check_transform(automaton_str, expected_str)
+
+    def test_case7(self) -> None:
+        """
+        Test Case 7.
+            Check that deterministic automatas are not modified
+        """
+        automaton_str = """
+        Automaton:
+            Symbols: abc
+
+            q0 final
+            q1 final
+            q2 final
+            q3
+            empty
+
+            --> q0
+            q0 -a-> q3
+            q0 -b-> empty
+            q0 -c-> q1
+            q1 -a-> q3
+            q1 -b-> empty
+            q1 -c-> q1
+            q2 -a-> q3
+            q2 -b-> empty
+            q2 -c-> q1
+            q3 -a-> empty
+            q3 -b-> q2
+            q3 -c-> empty
+            empty -a-> empty
+            empty -b-> empty
+            empty -c-> empty
+        """
+
+        self._check_transform(automaton_str, automaton_str)
 
         
 if __name__ == '__main__':
